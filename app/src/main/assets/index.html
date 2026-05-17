@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>VPN Finder</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow-x:hidden;background:#06060f}
+body{font-family:'Onest',sans-serif;min-height:100vh;position:relative}
+.gradient-bg{position:fixed;inset:0;background:radial-gradient(ellipse 80% 60% at 20% 20%,#1a0a3e 0%,transparent 60%),radial-gradient(ellipse 60% 80% at 80% 10%,#0d1f4a 0%,transparent 55%),radial-gradient(ellipse 100% 60% at 50% 80%,#0a1a2e 0%,transparent 60%),#06060f;animation:bgShift 8s ease-in-out infinite alternate;z-index:0}
+@keyframes bgShift{0%{filter:hue-rotate(0deg) brightness(1)}33%{filter:hue-rotate(15deg) brightness(1.1)}66%{filter:hue-rotate(-10deg) brightness(.95)}100%{filter:hue-rotate(25deg) brightness(1.05)}}
+.orb{position:fixed;border-radius:50%;filter:blur(60px);animation:orbFloat linear infinite;pointer-events:none;z-index:0}
+.orb1{width:220px;height:220px;background:rgba(99,60,255,.25);top:-60px;left:-40px;animation-duration:12s}
+.orb2{width:180px;height:180px;background:rgba(0,180,255,.18);top:100px;right:-50px;animation-duration:15s;animation-delay:-4s}
+.orb3{width:150px;height:150px;background:rgba(255,60,180,.15);bottom:30%;left:10px;animation-duration:10s;animation-delay:-7s}
+.orb4{width:120px;height:120px;background:rgba(0,255,180,.12);bottom:15%;right:20px;animation-duration:13s;animation-delay:-2s}
+@keyframes orbFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.15)}}
+.content{position:relative;z-index:2;padding:48px 20px 40px;max-width:480px;margin:0 auto}
+.header{text-align:center;margin-bottom:28px}
+.logo-icon{width:64px;height:64px;background:linear-gradient(135deg,#6c3cff,#00b4ff);border-radius:20px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;box-shadow:0 0 40px rgba(108,60,255,.55);font-size:30px}
+.app-title{font-family:'Unbounded',sans-serif;font-size:17px;font-weight:700;background:linear-gradient(90deg,#a78bff,#00d4ff,#ff6eb4,#a78bff);background-size:300% 100%;-webkit-background-clip:text;-webkit-text-fill-color:transparent;animation:shimmer 4s linear infinite;letter-spacing:.5px}
+@keyframes shimmer{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+.app-sub{font-size:11px;color:rgba(255,255,255,.35);margin-top:5px;letter-spacing:1.2px;text-transform:uppercase}
+.search-wrap{position:relative;margin-bottom:16px}
+.search-input{width:100%;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:15px 54px 15px 20px;color:#fff;font-family:'Onest',sans-serif;font-size:15px;outline:none;transition:all .3s}
+.search-input::placeholder{color:rgba(255,255,255,.3)}
+.search-input:focus{border-color:rgba(108,60,255,.7);background:rgba(255,255,255,.1);box-shadow:0 0 0 3px rgba(108,60,255,.2)}
+.search-btn{position:absolute;right:10px;top:50%;transform:translateY(-50%);width:38px;height:38px;background:linear-gradient(135deg,#6c3cff,#00b4ff);border:none;border-radius:12px;color:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px}
+.filters{display:flex;gap:8px;margin-bottom:22px;flex-wrap:wrap}
+.filter-chip{padding:7px 15px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.05);color:rgba(255,255,255,.5);transition:all .2s}
+.filter-chip.active{background:linear-gradient(135deg,rgba(108,60,255,.4),rgba(0,180,255,.3));border-color:rgba(108,60,255,.6);color:#fff}
+.section-label{font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:12px;font-weight:500}
+.vpn-card{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:16px;margin-bottom:14px;opacity:0;transform:translateY(24px);transition:opacity .5s ease,transform .5s ease}
+.vpn-card.visible{opacity:1;transform:translateY(0)}
+.card-top{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.card-logo{width:44px;height:44px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.card-info{flex:1}
+.card-name{font-size:15px;font-weight:600;color:#fff;margin-bottom:3px}
+.card-desc{font-size:12px;color:rgba(255,255,255,.45);line-height:1.5}
+.badge{font-size:10px;font-weight:600;padding:4px 10px;border-radius:20px;letter-spacing:.5px;white-space:nowrap;margin-top:4px;display:inline-block}
+.badge-free{background:rgba(0,255,150,.15);color:#00ff96;border:1px solid rgba(0,255,150,.25)}
+.badge-trial{background:rgba(255,190,0,.15);color:#ffc400;border:1px solid rgba(255,190,0,.25)}
+.badge-limit{background:rgba(0,180,255,.15);color:#00b4ff;border:1px solid rgba(0,180,255,.25)}
+.card-meta{display:flex;gap:14px;margin-bottom:12px;font-size:11px;color:rgba(255,255,255,.35)}
+.stars{color:#ffc400;font-size:12px}
+.card-link{background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:11px;color:rgba(255,255,255,.4);word-break:break-all;line-height:1.5;font-family:monospace}
+.card-btns{display:flex;gap:8px}
+.btn-open{flex:1;padding:12px;border-radius:13px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:linear-gradient(135deg,#6c3cff,#00b4ff);color:#fff;font-family:'Onest',sans-serif;transition:transform .15s}
+.btn-open:active{transform:scale(.97)}
+.btn-copy{padding:12px 16px;border-radius:13px;font-size:13px;cursor:pointer;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.7);transition:all .2s;font-family:'Onest',sans-serif}
+.btn-copy.copied{background:rgba(0,255,150,.15);border-color:rgba(0,255,150,.3);color:#00ff96}
+.loading-dots{display:none;justify-content:center;gap:8px;padding:2rem}
+.loading-dots.active{display:flex}
+.dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg,#6c3cff,#00b4ff);animation:bounce 1s infinite}
+.dot:nth-child(2){animation-delay:.15s}.dot:nth-child(3){animation-delay:.3s}
+@keyframes bounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-9px);opacity:1}}
+.empty-state{text-align:center;padding:3rem 1rem;color:rgba(255,255,255,.25);font-size:14px}
+</style>
+</head>
+<body>
+<div class="gradient-bg"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<div class="orb orb3"></div>
+<div class="orb orb4"></div>
+<div class="content">
+  <div class="header">
+    <div class="logo-icon">🛡️</div>
+    <div class="app-title">VPN &amp; PROXY FINDER</div>
+    <div class="app-sub">Проверенные сервисы · Бесплатный доступ</div>
+  </div>
+  <div class="search-wrap">
+    <input class="search-input" id="searchInput" type="text" placeholder="Бесплатный VPN, Прокси..." autocomplete="off"/>
+    <button class="search-btn" id="searchBtn">🔍</button>
+  </div>
+  <div class="filters" id="filters">
+    <div class="filter-chip active" data-filter="all">Все</div>
+    <div class="filter-chip" data-filter="free">Бесплатные</div>
+    <div class="filter-chip" data-filter="trial">Пробный период</div>
+    <div class="filter-chip" data-filter="proxy">Прокси</div>
+    <div class="filter-chip" data-filter="vpn">VPN</div>
+  </div>
+  <div class="section-label" id="sectionLabel" style="display:none"></div>
+  <div class="loading-dots" id="loader"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  <div id="results"></div>
+</div>
+<script>
+const DB=[
+  {name:"Proton VPN",desc:"Швейцарский VPN с безлимитным бесплатным тарифом, без рекламы и логов",logo:"🟣",logoBg:"rgba(108,60,255,.22)",badge:"free",badgeText:"Бесплатно навсегда",type:["vpn","free"],speed:"До 100 Мбит/с",servers:"3 страны",rating:5,link:"https://protonvpn.com/free-vpn"},
+  {name:"Windscribe VPN",desc:"10 ГБ в месяц бесплатно, 14+ стран, блокировщик рекламы",logo:"🌬️",logoBg:"rgba(0,180,255,.22)",badge:"free",badgeText:"10 ГБ/мес",type:["vpn","free","trial"],speed:"Без ограничений",servers:"14 стран",rating:5,link:"https://windscribe.com/?cpn=freedeal"},
+  {name:"Hiddify",desc:"Открытый клиент для VLESS/VMess/Reality конфигов, без рекламы",logo:"🔷",logoBg:"rgba(0,200,150,.22)",badge:"free",badgeText:"Бесплатно",type:["vpn","free"],speed:"Полная скорость",servers:"Свои конфиги",rating:4,link:"https://hiddify.com"},
+  {name:"Psiphon",desc:"Бесплатный прокси-туннель для обхода блокировок",logo:"🌐",logoBg:"rgba(255,150,0,.22)",badge:"free",badgeText:"Бесплатно",type:["proxy","free"],speed:"До 20 Мбит/с",servers:"Авто",rating:4,link:"https://psiphon3.com/ru"},
+  {name:"Lantern",desc:"P2P прокси-сеть, 500 МБ бесплатно, для обхода цензуры",logo:"🏮",logoBg:"rgba(255,60,120,.22)",badge:"limit",badgeText:"500 МБ",type:["proxy","free"],speed:"Средняя",servers:"P2P сеть",rating:3,link:"https://getlantern.org"},
+  {name:"Mullvad VPN",desc:"3 дня пробного периода, без аккаунта, максимальная анонимность",logo:"🦔",logoBg:"rgba(255,200,0,.22)",badge:"trial",badgeText:"3 дня пробно",type:["vpn","trial"],speed:"До 500 Мбит/с",servers:"40+ стран",rating:5,link:"https://mullvad.net/ru/vpn/free-trial"},
+  {name:"Ultrasurf Proxy",desc:"Бесплатный HTTP/HTTPS прокси, простой и быстрый запуск",logo:"⚡",logoBg:"rgba(0,180,255,.18)",badge:"free",badgeText:"Бесплатно",type:["proxy","free"],speed:"До 50 Мбит/с",servers:"США/Европа",rating:4,link:"https://ultrasurf.us"},
+  {name:"Tor Browser",desc:"Полностью бесплатная анонимная сеть с встроенным браузером",logo:"🧅",logoBg:"rgba(150,80,255,.22)",badge:"free",badgeText:"Бесплатно",type:["proxy","vpn","free"],speed:"Низкая (анонимность)",servers:"Tor-сеть",rating:4,link:"https://www.torproject.org/ru"}
+];
+let currentFilter="all";
+function stars(n){return"★".repeat(n)+"☆".repeat(5-n)}
+function renderCards(list){
+  const c=document.getElementById("results");
+  const lbl=document.getElementById("sectionLabel");
+  document.getElementById("loader").classList.remove("active");
+  if(!list.length){c.innerHTML='<div class="empty-state">🔍<br><br>Ничего не найдено.<br>Попробуйте другой запрос</div>';lbl.style.display="none";return}
+  lbl.style.display="block";lbl.textContent="Найдено: "+list.length+" сервис"+(list.length===1?"":"ов");
+  c.innerHTML=list.map((v,i)=>`<div class="vpn-card" id="card${i}" style="transition-delay:${i*.09}s"><div class="card-top"><div class="card-logo" style="background:${v.logoBg}">${v.logo}</div><div class="card-info"><div class="card-name">${v.name}</div><div class="card-desc">${v.desc}</div><span class="badge badge-${v.badge}">${v.badgeText}</span></div></div><div class="card-meta"><span>⚡ ${v.speed}</span><span>🌍 ${v.servers}</span><span class="stars">${stars(v.rating)}</span></div><div class="card-link">${v.link}</div><div class="card-btns"><button class="btn-open" onclick="openVpn('${v.link}')">🛡️ Открыть сервис</button><button class="btn-copy" id="cp${i}" onclick="copyLink(${i},'${v.link}')">📋</button></div></div>`).join("");
+  list.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById("card"+i);if(el)el.classList.add("visible")},i*90));
+}
+function doSearch(){
+  const q=document.getElementById("searchInput").value.toLowerCase().trim();
+  document.getElementById("results").innerHTML="";
+  document.getElementById("sectionLabel").style.display="none";
+  document.getElementById("loader").classList.add("active");
+  setTimeout(()=>{
+    const kw=["vpn","впн","прокси","proxy","бесплатн","free","анонимн"];
+    const hasKw=!q||kw.some(k=>q.includes(k));
+    renderCards(DB.filter(v=>(currentFilter==="all"||v.type.includes(currentFilter))&&(hasKw||v.name.toLowerCase().includes(q)||v.desc.toLowerCase().includes(q))));
+  },900);
+}
+function openVpn(url){window.open(url,"_blank")}
+function copyLink(i,link){
+  const btn=document.getElementById("cp"+i);
+  if(window.Android&&window.Android.copyToClipboard)window.Android.copyToClipboard(link);
+  else if(navigator.clipboard)navigator.clipboard.writeText(link).catch(()=>{});
+  btn.classList.add("copied");btn.textContent="✅";
+  setTimeout(()=>{btn.classList.remove("copied");btn.textContent="📋"},2000);
+}
+document.getElementById("searchBtn").onclick=doSearch;
+document.getElementById("searchInput").onkeydown=e=>{if(e.key==="Enter")doSearch()};
+document.getElementById("filters").onclick=e=>{
+  const chip=e.target.closest(".filter-chip");
+  if(!chip)return;
+  document.querySelectorAll(".filter-chip").forEach(c=>c.classList.remove("active"));
+  chip.classList.add("active");currentFilter=chip.dataset.filter;doSearch();
+};
+renderCards(DB);
+</script>
+</body>
+</html>
